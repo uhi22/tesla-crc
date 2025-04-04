@@ -105,6 +105,76 @@ Half down
 
 ```
 
+
+## Checking the 0x249
+
+```
+Starting with the log data (Ref2), extracting messages which shift a single bit:
+9B 00 00 00
+ED 10 00 00
+77 20 00 00
+6C 40 00 00
+5A 80 00 00
+
+Calculating the XOR difference between the "zero" and the bit:
+data       0    1    2    4    8
+crc       9B   ED   77   6C   5A
+xor          76
+                 EC
+                      F7
+                          C1
+
+According to Ref4, looking whether this sequence 76 EC F7 C1 fits either to "just shifted" or to "shifted and Xored".
+
+76 << 1 = EC  -> just shifted.
+EC << 1 = D8 but we see F7. This will reveal the polynom.
+    (EC << 1) XOR F7 = 12F --> 1 0010 1111 --> Polynom is x^8 + x^5 + x^3 + x^2 + x^1 + x^0.
+F7 << 1 = EE but we see C1. This will reveal the polynom.
+     (F7 << 1) XOR C1 = 12F. As above. Polynom confirmed.
+
+
+Trying the same procedure with an other part of the data:
+9B 00 00 00
+87 00 02 00
+A3 00 04 00
+EB 00 08 00
+
+data    0      2    4   8  
+crc     9B     87  A3   EB
+xor         1C
+                 38
+                      70
+
+1C << 1 = 38 --> just shifted
+38 << 1 = 70 --> just shifted
+
+```
+
+The polynom 12F (or just 2F if looking to 8 bits) is used in two "official" configurations according to Ref5: CRC-8/OPENSAFETY and CRC-8/AUTOSAR.
+
+Try with CRC-8/OPENSAFETY (Ref5):
+```
+10 00 00 00 gives 76
+20 00 00 00 gives EC
+40 00 00 00 gives F7
+80 00 00 00 gives C1
+
+00 02 00 00 gives 1C
+00 04 00 00 gives 38
+00 08 00 00 gives 70
+```
+
+This fits perfectly to the above calculated XOR values.
+
+Intermediate calculation algorithm:
+* Input: Inputbuffer[4]. Byte0 will later contain the CRC. Byte1 contains the counter in lower nibble. Treat as zero.
+* copy inputbuffer[1...3] into temporaryBuffer[0...2]
+* set temporaryBuffer[3] = 0
+* calculate CRC over temporaryBuffer[0...3], using "CRC-8/OPENSAFETY with poly=2F".
+* xor the CRC with 9B (magicByte, depending on alive counter)
+* write the result into Inputbuffer[0]
+* write the alive counter into lower nibble of Inputbuffer[1]
+
 ## Open Todos
 
 * [ ] Does the same algorithm also work for the other side?
@@ -116,3 +186,7 @@ Half down
 * Ref1: Data of the 0x229 stalk: https://openinverter.org/forum/viewtopic.php?p=81258#p81258
 * Ref2: Logs with many combinations, for left and right stalk: https://openinverter.org/forum/viewtopic.php?p=81331#p81331
 * Ref3: Simple addition for 0x313: https://openinverter.org/forum/viewtopic.php?p=77694#p77694
+* Ref4: How to calculate the CRC polynom out of observed data: https://knx-user-forum.de/forum/%C3%B6ffentlicher-bereich/knx-eib-forum/diy-do-it-yourself/34358-ekey-fingerscanner-per-rs485-auslesen-protokollanalyse?p=626281#post626281
+* Ref5: CRC online calculator https://crccalc.com/?crc=00%2000%2001&method=CRC-8/AUTOSAR&datatype=hex&outtype=hex
+
+
