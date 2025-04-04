@@ -2,6 +2,10 @@
 
 ## Status & News
 
+### 2025-04-04: Polynom for 0x249 found
+
+see below. The CRC is using the "12F" polynom of OPENSAFETY (or AUTOSAR).
+
 ### 2025-04-04: Calculation for the 0x229 works
 
 We use a table of magic patterns, this is 16 bytes long, and the alive counter is the index in this table.
