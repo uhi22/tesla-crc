@@ -2,6 +2,19 @@
 
 ## Status & News
 
+### 2025-04-05: CRC for 0x249 fully verified
+
+The tesla-crc-filereader.c reads the 870 samples from Ref2, calculates the CRC of each message and compares it with the CRC from the log. No deviation, all CRCs are correctly calculated.
+
+```
+Looped over 870 lines.
+CRC ok: 870,  CRC fail: 0
+```
+
+This confirms the approach:
+* It is a CRC8 with polynom 2F, like CRC-8/OPENSAFETY.
+* Alive counter is not included into CRC. Instead, alive counter is index into a 16-byte-table with magic bytes, which are individual for each ID.
+
 ### 2025-04-04: Polynom for 0x249 found
 
 see below. The CRC is using the "12F" polynom of OPENSAFETY (or AUTOSAR).
