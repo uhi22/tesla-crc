@@ -12,7 +12,7 @@ The algorithm for transmitting the end-to-end protected message:
 * Use a buffer which is one byte bigger than the CAN message. So 5 bytes in the example. We use index 0 to 4 for them.
 * Fill the complete message with 0x00. This is especially needed for byte 0 (later to be filled with the CRC), the byte 1 (later to be filled with the alive counter, and byte 4 (the virtual extra byte).
 * Fill the payload data into the message. This will be in the higher nibble of byte 1, and the full bytes 2 and 3.
-* Calculate the CRC starting at byte 1 and length 4. So it sees the virtual extra byte as last input data.
+* Calculate the CRC (using the OPENSAFETY CRC-8, function generateCrc8Opensafety()) starting at byte 1 and length 4. So it sees the virtual extra byte as last input data.
 * Calculate the magic byte by using the current alive counter as index in the magic byte table.
 * Fill into byte 0 the XOR of the CRC and the magic byte.
 * Fill into the lower nibble of byte 1 the alive counter.
