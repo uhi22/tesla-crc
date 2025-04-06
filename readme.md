@@ -2,6 +2,25 @@
 
 ## Status & News
 
+### 2025-04-06: CRC for 0x229 also fits
+
+The tesla-crc-filereader.c reads the 870 samples of the message 0x249 plus 178 samples of the message 0x229 (both from Ref2), calculates the CRC of each message and compares it with the CRC from the log. No deviation, all CRCs are correctly calculated.
+
+The algorithm for transmitting the end-to-end protected message:
+
+* In the example, we use a 4 byte CAN message. Other length are also possible.
+* Use a buffer which is one byte bigger than the CAN message. So 5 bytes in the example. We use index 0 to 4 for them.
+* Fill the complete message with 0x00. This is especially needed for byte 0 (later to be filled with the CRC), the byte 1 (later to be filled with the alive counter, and byte 4 (the virtual extra byte).
+* Fill the payload data into the message. This will be in the higher nibble of byte 1, and the full bytes 2 and 3.
+* Calculate the CRC starting at byte 1 and length 4. So it sees the virtual extra byte as last input data.
+* Calculate the magic byte by using the current alive counter as index in the magic byte table.
+* Fill into byte 0 the XOR of the CRC and the magic byte.
+* Fill into the lower nibble of byte 1 the alive counter.
+* Transmit the bytes 0 to 3 to CAN.
+* Increment the alive counter. If it reaches 16, set it to zero.
+
+The table of magic bytes is individual for each CAN identifier. It can be created based on the observed log files. The magic byte is the value of byte 0 of the message, when all payload bits are zero. We have 16 possible values for the alive counter, so the table of magic bytes has 16 entries.
+
 ### 2025-04-05: CRC for 0x249 fully verified
 
 The tesla-crc-filereader.c reads the 870 samples from Ref2, calculates the CRC of each message and compares it with the CRC from the log. No deviation, all CRCs are correctly calculated.
@@ -194,9 +213,7 @@ Intermediate calculation algorithm:
 
 ## Open Todos
 
-* [ ] Does the same algorithm also work for the other side?
-* [ ] Find the CRC polynoms and replace the if-then by a real CRC calculation.
-* [ ] Can the array of magic bytes also be calculated?
+(none)
 
 ## References
 
