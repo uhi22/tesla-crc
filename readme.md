@@ -1,6 +1,10 @@
-# Tesla CRC Analysis
+# Tesla (and others) CRC Analysis
 
 ## Status & News
+
+### 2025-04-28: Added sub-folder for Volkswagen analysis
+
+CRC calculation of MQBs ESP_21 message works.
 
 ### 2025-04-06: CRC for 0x229 also fits
 
